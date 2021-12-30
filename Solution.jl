@@ -3,16 +3,15 @@ module Solution
 export Solucao, swapVertices, reverseSegment, moveSegment, swapSegments, copySolution
 
 mutable struct Solucao
-    caminho
-    custo
-    distancia
-	arestas
-    diversidade
-    rankcusto
-    biasedFitness
+    caminho::Vector{Int64}
+    custo::Float64
+    distancia::Array{Float64,2}		#VERIFICAR
+	arestas::Vector{Int64}
+    diversidade::Float64
+    rankcusto::Int64
+    biasedFitness::Float64
 
-    #Solucao(caminho::Vector{Int64}, dist::Array{Float64,2}) = new(caminho, custoCaminho(caminho, dist), dist, 0, -1, 0, 0) # estados inválidos de arestas em diante
-	Solucao(caminho, dist) = new(caminho, custoCaminho(caminho, dist), dist, [], -1, 0, 0) # estados inválidos de arestas em diante
+	Solucao(caminho::Vector{Int64}, dist::Array{Float64,2}) = new(caminho, custoCaminho(caminho, dist), dist, [], -1, 0, 0) # estados inválidos de arestas em diante
 
 end
 
@@ -42,38 +41,12 @@ end
 # busca_2opt
 function reverseSegment(solucao::Solucao, inicio::Int64, fim::Int64)
 	reverse!(solucao.caminho, inicio, fim) 
+	
 	atualizaCusto(solucao)
 end
 
 # orOpt
 function moveSegment(solucao::Solucao, inicio::Int64, destino::Int64, K::Int64)
-	
-	# [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-
-	# inicio = 4
-	# destino = 13
-	# K = 3
-
-	#tmp = [4, 5, 6]
-
-	# for 1 => 4+3:13+4-1 => 7:16
-		#  4 <- 7
-		#  5 <- 8
-		# 13 <- 16
-
-
-	# [1, 2, 3, 7, 8, 9, 10, 11, 12, 13, 14, 15, [4, 5, 6], 16, 17, 18, 19, 20]
-
-	# inicio = 13
-	# destino = 4
-	# K = 3
-
-	#tmp = [13, 14, 15]
-			# 15 <- 12
-			# 14 <- 11
-			# 7  <- 4
-
-	# [1, 2, 3, [13, 14, 15], 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 17, 18, 19, 20]
 	
 	tmp::Vector{Int64} = solucao.caminho[inicio:inicio+K-1]
 	signal::Int64 = sign(destino - inicio)
@@ -82,7 +55,6 @@ function moveSegment(solucao::Solucao, inicio::Int64, destino::Int64, K::Int64)
 	for i = inicio + zero_um: signal :destino
 		solucao.caminho[i - zero_um * K] = solucao.caminho[i+(1 + zero_um) * K]
 	end
-	
 
 	#=if inicio < destino
 		for i = inicio:destino
