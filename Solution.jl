@@ -5,7 +5,7 @@ export Solucao, swapVertices, reverseSegment, moveSegment, swapSegments, copySol
 mutable struct Solucao
     caminho::Vector{Int64}
     custo::Float64
-    distancia::Array{Float64,2}		#VERIFICAR
+    distancia::Array{Float64,2}	
 	arestas::Vector{Int64}
     diversidade::Float64
     rankcusto::Int64
@@ -18,16 +18,6 @@ end
 # Público
 # copy = cópia superficial, objetos compartilham referências
 # deepcopy = cópia profunda, cópia todos os subobjetos, cria objetos 100% independentes
-
-function copySolution(solucao::Solucao)::Solucao
-	
-	# s = Solucao()
-	# s.custo = solucao.custo  # usar o copy aqui seria redundante, mas provavelmente funcionaria
-	# s.dist = solucao.dist
-	# s.caminho = copy(solucao.caminho)
-
-	return Solucao(copy(solucao.caminho), solucao.distancia)
-end
 
 # swap
 function swapVertices(solucao::Solucao, inicio::Int64, destino::Int64)

@@ -3,10 +3,9 @@
 module Populacao  # precisa ter o nome do arquivo
 
 using Solution, Profile, BuscaLocal, Random, Leitor, Extractor
-export geraPopulacao, preencheArestas, diversidade, biasedFitness, selecionar_sobreviventes, binarytournament, crossoverOX
+export geraPopulacao, preencheArestas, diversidade, biasedFitness, seleciona_sobreviventes, binarytournament, crossoverOX
 
-const epsilon = 0.001 
-#num_individuo = 20
+const epsilon = 0.001
 #Random.seed!(3)
   
 function geraPopulacao(distancia::Array{Float64,2}, tamanho_populacao::Int64)::Vector{Solucao}     #o retorno é solução.  Qual tipo?
@@ -52,7 +51,7 @@ function preencheArestas(individuo::Solucao)
 
         for j = 1:tamanho_caminho #tamanho distancia     # pra começar na posição 2
         
-            individuo.arestas[individuo.caminho[j]] = individuo.caminho[j+1]
+            @inbounds individuo.arestas[individuo.caminho[j]] = individuo.caminho[j+1]
 
         end
 end
@@ -80,39 +79,34 @@ function distancia_arestas(individuo_1::Solucao, individuo_2::Solucao)::Int64
 end
 
 
-function mediasDistances(individuo_1::Solucao, populacao::Vector{Solucao}, u_close::Int64)::Float64
-
-    distances::Vector{Int64} = []
-
-    for individuo_2::Solucao in populacao
-        
-        if individuo_1 === individuo_2
-            continue
-        end
-        push!(distances, distancia_arestas(individuo_1, individuo_2))
-    end
-
-    sort!(distances) # pra pegar os mais próximos
-
-    sum::Float64 = 0
-
-    for i = 1:u_close
-        sum += distances[i]
-    end
-
-    return sum / u_close
-
-end
-
-
 function diversidade(populacao::Vector{Solucao}, u_close::Int64)
 
     tamanho_populacao::Int64 = length(populacao)
 
     for i =1:tamanho_populacao
-        populacao[i].diversidade = mediasDistances(populacao[i], populacao, u_close)
-    end
 
+        distances::Vector{Int64} = []
+
+        for j = 1:tamanho_populacao
+
+            if populacao[i] === populacao[j]
+                continue
+            end
+
+            push!(distances, distancia_arestas(populacao[i], populacao[j]))
+        end
+
+        sort!(distances) # pra pegar os mais próximos
+
+        sum::Float64 = 0
+
+        for i = 1:u_close
+            sum += distances[i]
+        end
+
+        @inbounds populacao[i].diversidade =  sum / u_close
+    end
+        
 end
 
 
@@ -122,23 +116,18 @@ function biasedFitness(populacao::Vector{Solucao}, u_elite::Int64, u_close::Int6
     diversidade(populacao, u_close)
 
     tamanho_populacao::Int64 = length(populacao)
-
-    rank_custo::Vector{Solucao} = copy(populacao)
-    rank_diversidade::Vector{Solucao} = copy(populacao)
     
-    sort!(rank_custo, by = elem -> elem.custo)      # menor é melhor
-    sort!(rank_diversidade, by = elem -> -elem.diversidade) # maior é melhor (sinal de 'menor')
-    
-    #println("\nRank custo é: ", rank_custo)
-    #println("Rank diversidade é: ", rank_diversidade)
+    sort!(populacao, by = elem -> elem.custo)      # menor é melhor
 
     # Nesse primeiro, vai pegar na sequencia e essa sequencia vai estar em outra ordem no outro for
     for i = 1:tamanho_populacao
-        rank_custo[i].rankcusto = i
+        @inbounds populacao[i].rankcusto = i
     end
 
+    sort!(populacao, by = elem -> -elem.diversidade) # maior é melhor (sinal de 'menor')
+
     for i = 1:tamanho_populacao     #### isso precisa ser ajustado
-        rank_diversidade[i].biasedFitness = rank_diversidade[i].rankcusto + ((1- (u_elite/tamanho_populacao))* i)
+        @inbounds populacao[i].biasedFitness = populacao[i].rankcusto + ((1- (u_elite/tamanho_populacao))* i)
     end
 
     #println("\nRank custo é: ", rank_custo)
@@ -224,7 +213,7 @@ function crossoverOX(pais::Vector{Solucao})::Solucao  # Versão corrigida   pai_
 end
 
         
-function selecionar_sobreviventes(populacao::Vector{Solucao}, tamanho_inicial::Int64, lambda::Int64)
+function seleciona_sobreviventes(populacao::Vector{Solucao}, tamanho_inicial::Int64, lambda::Int64)
 
     sort!(populacao, by = elem -> elem.biasedFitness)
 

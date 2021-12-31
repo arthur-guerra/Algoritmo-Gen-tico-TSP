@@ -1,4 +1,3 @@
-
 # @file Main AG.jl
 
 # @author Arthur Leandro Guerra Pires
@@ -8,8 +7,6 @@
 push!(LOAD_PATH, pwd())
 using Genetico,  Leitor, Extractor, PrettyTables
 
-
-# Valores experimentais
 
 function filterInstances()
     files = readdir("Instancias")			#Vem com Instancia/Arquivo
@@ -67,10 +64,10 @@ function bestindividuo(populacao, tamanho_inicial)
 end
 
 
-function RodarInstancia(K)
+function runInstances(K)
 
     instances = filterInstances()
-    ok = [3]
+    ok = [2]
     resultados = []
     matrix = []
 
@@ -89,7 +86,7 @@ function RodarInstancia(K)
 
         u_close = 3
         u_elite = 5
-        lambda= 20
+        lambda= 40
         tamanho_inicial = 20
         
         for i = 1:K
@@ -107,37 +104,4 @@ end
 
 
 
-RodarInstancia(1)
-
-
-#distancia= [0 1 2 3 4 5 6; 1 0 2 1 4 9 1; 2 2 0 5 9 7 2; 3 1 5 0 3 8 6; 4 4 9 3 0 2 5; 5 9 7 8 2 0 2; 6 1 2 6 5 2 0]
-
-#=
-u_close = 3
-u_elite = 5
-lambda= 20
-tamanho_inicial = 20
-
-individualTime = @elapsed populacao = Algoritmo_Genetico(distancia, tamanho_inicial, u_close, u_elite, lambda)
-println(" Tempo: ", round.(individualTime, digits=3), " s")
-
-println("O TAMANHO FINAL É: ", length(populacao))
-
-
-
-function bestindividuo(tamanho_inicial)
-
-    melhor_individuo = populacao[1]
-
-    for i = 2:tamanho_inicial
-        if populacao[i].custo < melhor_individuo.custo
-            melhor_individuo = populacao[i]
-        end
-    end
-
-    println("Custo individuo: ", melhor_individuo.custo)
-    println("Caminho individuo: ", melhor_individuo.caminho)
-
-end
-
-bestindividuo(tamanho_inicial)=#
+runInstances(1)   

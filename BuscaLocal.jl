@@ -1,6 +1,6 @@
 module BuscaLocal
 
-using Solution, Profile	#profile ?
+using Solution, Profile
 export Buscalocal
 
 const epsilon = 0.001 
@@ -25,10 +25,10 @@ function swap(solucao::Solucao)::Bool  # Função de troca de posição
 		no_B_anterior::Int64 = no_B - 1
 		no_B_seguinte::Int64 = no_B + 1
 
-		custo_Removido_A::Float64 = distancia[caminho[no_A_anterior], caminho[no_A]]
-		custo_Removido_B::Float64 = distancia[caminho[no_B], caminho[no_B_seguinte]]
-		custo_Adicionado_B::Float64 = distancia[caminho[no_A_anterior], caminho[no_B]]
-		custo_Adicionado_A::Float64 = distancia[caminho[no_A], caminho[no_B_seguinte]]
+		@inbounds custo_Removido_A::Float64 = distancia[caminho[no_A_anterior], caminho[no_A]]
+		@inbounds custo_Removido_B::Float64 = distancia[caminho[no_B], caminho[no_B_seguinte]]
+		@inbounds custo_Adicionado_B::Float64 = distancia[caminho[no_A_anterior], caminho[no_B]]
+		@inbounds custo_Adicionado_A::Float64 = distancia[caminho[no_A], caminho[no_B_seguinte]]
 
 		custo_Removido::Float64 = custo_Removido_A + custo_Removido_B  # Custo original sem a mudança
 		custo_Adicionado::Float64 = custo_Adicionado_B + custo_Adicionado_A # Custo com a inversão de B para A e A para B!
@@ -47,10 +47,10 @@ function swap(solucao::Solucao)::Bool  # Função de troca de posição
 			no_B_anterior = no_B - 1
 			no_B_seguinte = no_B + 1
 
-			custo_Removido_A = distancia[caminho[no_A_anterior], caminho[no_A]] + distancia[caminho[no_A], caminho[no_A_seguinte]]
-			custo_Removido_B = distancia[caminho[no_B_anterior], caminho[no_B]] + distancia[caminho[no_B], caminho[no_B_seguinte]]
-			custo_Adicionado_B = distancia[caminho[no_A_anterior], caminho[no_B]] + distancia[caminho[no_B], caminho[no_A_seguinte]]
-			custo_Adicionado_A = distancia[caminho[no_B_anterior], caminho[no_A]] + distancia[caminho[no_A], caminho[no_B_seguinte]]
+			@inbounds custo_Removido_A = distancia[caminho[no_A_anterior], caminho[no_A]] + distancia[caminho[no_A], caminho[no_A_seguinte]]
+			@inbounds custo_Removido_B = distancia[caminho[no_B_anterior], caminho[no_B]] + distancia[caminho[no_B], caminho[no_B_seguinte]]
+			@inbounds custo_Adicionado_B = distancia[caminho[no_A_anterior], caminho[no_B]] + distancia[caminho[no_B], caminho[no_A_seguinte]]
+			@inbounds custo_Adicionado_A = distancia[caminho[no_B_anterior], caminho[no_A]] + distancia[caminho[no_A], caminho[no_B_seguinte]]
 
 			custo_Removido = custo_Removido_A + custo_Removido_B  
 			custo_Adicionado = custo_Adicionado_B + custo_Adicionado_A 
@@ -98,11 +98,11 @@ function busca_2opt(solucao::Solucao)::Bool
 			custo_Adicionado::Float64 = 0 
 			custo_Removido::Float64 = 0 
 
-			custo_Adicionado += distancia[caminho[node_inicial],caminho[node_final+1]] # Calculo do extremo inicial 
-			custo_Adicionado += distancia[caminho[node_inicial-1],caminho[node_final]] # Calculo do extremo final 
+			@inbounds custo_Adicionado += distancia[caminho[node_inicial],caminho[node_final+1]] # Calculo do extremo inicial 
+			@inbounds custo_Adicionado += distancia[caminho[node_inicial-1],caminho[node_final]] # Calculo do extremo final 
 
-			custo_Removido += distancia[caminho[node_inicial-1],caminho[node_inicial]]
-			custo_Removido += distancia[caminho[node_final],caminho[node_final+1]]
+			@inbounds custo_Removido += distancia[caminho[node_inicial-1],caminho[node_inicial]]
+			@inbounds custo_Removido += distancia[caminho[node_final],caminho[node_final+1]]
 
 
 			custo::Float64 = custo_Corrente + custo_Adicionado - custo_Removido 
@@ -143,13 +143,13 @@ function orOpt(solucao::Solucao, K::Int64)::Bool    # K é o tamanho da seção 
 
 		for destino = 2:origem-1
 
-			custo_Removido =   solucao.distancia[solucao.caminho[destino-1], solucao.caminho[destino]] + 
+			@inbounds custo_Removido =   solucao.distancia[solucao.caminho[destino-1], solucao.caminho[destino]] + 
 			solucao.distancia[solucao.caminho[origem-1], solucao.caminho[origem]] +  
 			solucao.distancia[solucao.caminho[origem+K-1], solucao.caminho[origem+K]]
 			
-			custo_Adicionado_1 =  solucao.distancia[solucao.caminho[destino-1], solucao.caminho[origem]]    
-			custo_Adicionado_2 =  solucao.distancia[solucao.caminho[origem+K-1], solucao.caminho[destino]]
-			custo_Adicionado_3 =  solucao.distancia[solucao.caminho[origem-1], solucao.caminho[origem+K]]
+			@inbounds custo_Adicionado_1 =  solucao.distancia[solucao.caminho[destino-1], solucao.caminho[origem]]    
+			@inbounds custo_Adicionado_2 =  solucao.distancia[solucao.caminho[origem+K-1], solucao.caminho[destino]]
+			@inbounds custo_Adicionado_3 =  solucao.distancia[solucao.caminho[origem-1], solucao.caminho[origem+K]]
 			
 			custo_Adicionado = custo_Adicionado_1 + custo_Adicionado_2 + custo_Adicionado_3
 			
@@ -164,13 +164,13 @@ function orOpt(solucao::Solucao, K::Int64)::Bool    # K é o tamanho da seção 
 
 		for destino = origem+1:length(solucao.caminho)-K
 
-			custo_Removido =    solucao.distancia[solucao.caminho[origem-1], solucao.caminho[origem]] + 
+			@inbounds custo_Removido =    solucao.distancia[solucao.caminho[origem-1], solucao.caminho[origem]] + 
 			solucao.distancia[solucao.caminho[origem+K-1], solucao.caminho[origem+K]] +  
 			solucao.distancia[solucao.caminho[destino+K-1], solucao.caminho[destino+K]]
 
-			custo_Adicionado_1 =  solucao.distancia[solucao.caminho[origem-1], solucao.caminho[origem+K]]
-			custo_Adicionado_2 =  solucao.distancia[solucao.caminho[destino+K-1], solucao.caminho[origem]]      
-			custo_Adicionado_3 = solucao.distancia[solucao.caminho[origem+K-1], solucao.caminho[destino+K]]   
+			@inbounds custo_Adicionado_1 =  solucao.distancia[solucao.caminho[origem-1], solucao.caminho[origem+K]]
+			@inbounds custo_Adicionado_2 =  solucao.distancia[solucao.caminho[destino+K-1], solucao.caminho[origem]]      
+			@inbounds custo_Adicionado_3 = solucao.distancia[solucao.caminho[origem+K-1], solucao.caminho[destino+K]]   
 
 			custo_Adicionado = custo_Adicionado_1 + custo_Adicionado_2 + custo_Adicionado_3
 
