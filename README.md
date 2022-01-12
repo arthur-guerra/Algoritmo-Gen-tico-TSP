@@ -5,11 +5,12 @@ Essa implementação foi referente ao algoritmo Algoritmo Genético, aplicado ao
 Para rodar, execute: 
 
 ```
-$ julia
-julia$ include("Main_AG.jl")
+julia>
+
+julia> include("Main_AG.jl")
 ```
 ou
 
 ```
-$ julia Main_AG.jl
+julia> Main_AG.jl
 ```
