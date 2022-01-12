@@ -5,7 +5,13 @@
 # Contact: a.guerrapires@hotmail.com
 
 push!(LOAD_PATH, pwd())
-using Genetico,  Leitor, Extractor, PrettyTables
+using Genetico, Leitor, Extractor, Writer, PrettyTables
+
+struct BenchILS
+    nome
+    custo_medio
+    tempo_medio
+end
 
 
 function filterInstances()
@@ -58,29 +64,65 @@ function bestindividuo(populacao, tamanho_inicial)
         end
     end
 
-    println("Melhor Custo individuo: ", melhor_individuo.custo)
-    println("Melhor Caminho individuo: ", melhor_individuo.caminho)
-
+    return melhor_individuo
 end
+
+function benchILS()
+
+    intances_select = [] # ajeitar
+
+    open("Custo_Tempo_ILS.csv") do file
+
+        while !eof(file) # a função vai identificar um conjunto de caracteres no fim!
+            
+            line = readline(file) # Consome uma linha e "destroi" 
+
+            numbers::Vector{String} = split(line, ";")
+
+            resultado_fim::BenchILS = BenchILS(numbers[1], parse(Float64, numbers[2]), parse(Float64, numbers[3]))
+
+            push!(intances_select,resultado_fim) # para guardar as informações dos que sobrarem
+
+        end
+    end
+    return intances_select
+end
+
 
 
 function runInstances(K)
 
     instances = filterInstances()
-    ok = [2]
+
+
+    println("Teste instancia: ", instances[5])
+
+    ok =[5]
+    no_ok = [1,2, 3,4, 5, 9,10]
+
     resultados = []
     matrix = []
 
+    bench_ILS = benchILS()
+
     i = 0
+
     for instance in instances
 
         i += 1
 
         if i ∉ ok		# só pegar o conjunto do "ok"
-            continue
+            continue  
         end
 
+        #=if i ∈ no_ok		# só pegar o conjunto do "ok"
+            continue  
+        end  =#
+
+
         matrix = readFile(instance.fileName)
+
+        println("matrix: MATRIX")
         
         println(instance.name)
 
@@ -88,20 +130,27 @@ function runInstances(K)
         u_elite = 5
         lambda= 40
         tamanho_inicial = 20
+
         
-        for i = 1:K
+        for j = 1:K
 
-            individualTime = @elapsed populacao = Algoritmo_Genetico(matrix, tamanho_inicial, u_close, u_elite, lambda)
+            individualTime = @elapsed populacao = Algoritmo_Genetico(matrix, tamanho_inicial, u_close, u_elite, lambda, bench_ILS[i].tempo_medio)
+
             println(" Tempo: ", round.(individualTime, digits=3), " s")
-            #println("Custo individuo: ", populacao[i].custo)
+            
+            melhor_individuo = bestindividuo(populacao, tamanho_inicial)
+            
+            println("Custo melhor individuo: ", melhor_individuo.custo)
 
-            bestindividuo(populacao, tamanho_inicial)
+            push!(resultados, Result(instance.name, j, melhor_individuo.custo, round.(individualTime, digits=3)))
 
         end        
     end
+
+    writeFile("Resultados2.csv", resultados, ";")
 
 end
 
 
 
-runInstances(1)   
+runInstances(5)   
