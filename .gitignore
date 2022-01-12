@@ -4,3 +4,4 @@ Anotations.zip
 *.csv
 !instancias.csv
 !Custo_Tempo_ILS.csv
+!Resultados_Genético_BenchILS.csv
