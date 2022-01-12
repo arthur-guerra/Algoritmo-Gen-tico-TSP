@@ -3,3 +3,4 @@ Anotations.zip
 .vscode/**
 *.csv
 !instancias.csv
+!Custo_Tempo_ILS.csv
